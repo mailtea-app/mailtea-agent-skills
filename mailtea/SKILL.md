@@ -51,10 +51,10 @@ Different from transactional: `issue.create_draft` → `issue.update_draft` →
 
 ## In code instead of MCP
 
-Node SDK (`npm i mailtea`):
+Node SDK (`npm i @mailtea-app/sdk`):
 
 ```ts
-import { Mailtea } from "mailtea";
+import { Mailtea } from "@mailtea-app/sdk";
 const mailtea = new Mailtea(process.env.MAILTEA_API_KEY);
 const { id } = await mailtea.emails.send({
   from: "you@yourdomain.com",
