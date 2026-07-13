@@ -31,7 +31,3 @@ A Mailtea personal access token (prefix `mt_pat_`) from the Mailtea dashboard
 
 [MIT](./LICENSE)
 
----
-
-This repo is a read-only mirror synced from the Mailtea monorepo. Issues are
-welcome here.
