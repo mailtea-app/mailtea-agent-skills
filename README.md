@@ -9,7 +9,7 @@ emails that survive real inboxes.
 
 | Skill | What it does |
 |-------|--------------|
-| [`mailtea`](./mailtea/SKILL.md) | Send, schedule, and manage email — transactional sends, batches, delivery status, contacts, segments, newsletters — via the Mailtea MCP server, the `@mailtea-app/sdk` Node SDK, or the REST API. |
+| [`mailtea`](./mailtea/SKILL.md) | Send, schedule, and manage email — transactional sends, batches, delivery status, contacts, segments, newsletters — via the Mailtea MCP server, the `mailtea-sdk` Node SDK, or the REST API. |
 | [`mailtea-email-design`](./mailtea-email-design/SKILL.md) | Design the email itself: layout, typography, and email-safe HTML that renders correctly across real email clients. |
 
 ## Install
