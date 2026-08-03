@@ -21,7 +21,7 @@ Get a personal access token (prefix `mt_pat_`) from the Mailtea dashboard
 claude mcp add mailtea -e MAILTEA_API_TOKEN=mt_pat_xxx -- npx -y mailtea-mcp
 ```
 
-Self-hosting or local dev? add `-e MAILTEA_API_BASE_URL=http://localhost:8787`.
+Self-hosting or local dev? add `-e MAILTEA_API_BASE_URL=http://localhost:7787`.
 
 ## Send a transactional email — `email.send`
 
