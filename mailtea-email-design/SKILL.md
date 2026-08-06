@@ -1,19 +1,141 @@
 ---
 name: mailtea-email-design
-description: Design a beautiful, on-brand, deliverable email or template BEFORE creating it in Mailtea. Use when an agent is about to write the HTML for a Mailtea template, transactional email, or newsletter post — to get email-safe layout, typography, color, and a render/QA loop right the first time. Pairs with the mailtea-email skill (which covers sending/managing) — this one covers how the email should LOOK.
+description: Design a beautiful, on-brand, deliverable email, newsletter or template in Mailtea. Use when an agent is about to build or restyle a Mailtea email — covers the structured block/ops path (fastest, email-safe by construction), hand-written email-safe HTML when you own the whole document, images, brand colour, and the render/QA loop. Pairs with the mailtea-email skill (which covers sending/managing) — this one covers how the email should LOOK.
 ---
 
 # Mailtea email design
 
 `mailtea-email` teaches you how to *send*. This teaches you how to make the email
 *look good* — and survive real inboxes. Email is not the web: no flexbox, no CSS
-variables, no web fonts you can rely on, and Outlook renders with Word. Design
-*within* those constraints, not against them.
+variables, no web fonts you can rely on, and Outlook renders with Word.
 
-Work in four passes (borrowed from impeccable's shape → craft → critique → polish,
-adapted for email): **frame → build → lint → render-and-compare.**
+## Choose your path first — one of these is much faster
 
-## 0. Pick the surface — this decides whether your design survives
+| | **A. Ops (structured blocks)** — prefer this | **B. Hand-written HTML** |
+|---|---|---|
+| You write | Declarative blocks: `{kind:"heading",…}`, `{kind:"button",…}` | Tables, inline styles, media queries |
+| Email-safety | **By construction.** The reducer only emits nodes that survive an inbox; it cannot produce `display:flex` | **Yours to get right** — see the contract below |
+| Editing later | Surgical: address one block by path and change it | Re-emit the whole document |
+| The operator | Keeps editing it as normal blocks in the Visual Email Designer | Opens as one "Custom HTML" block |
+| Use for | Newsletters, broadcasts, anything an operator will touch again | Pixel-controlled transactional designs (receipts) where YOU own the whole layout |
+
+**Default to A.** Reach for B only when you genuinely need a complete
+`<!DOCTYPE html>` document. If you are doing B, skip to *The email-safe contract*.
+
+## A. The ops path
+
+### The loop
+
+```
+issue.create_draft  →  issue.apply_ops (compose + set_styles + set_headers)
+                    →  email.lint      →  issue.preview / posts send-test
+                    →  issue.apply_ops (edit_text / edit_block / arrange) to refine
+```
+
+`issue.apply_ops` takes a batch and returns a **report**: `applied`, `skipped`
+(each with a reason), and — after any structural op — a fresh **outline**. Read
+the report. It is the correction signal; nothing fails silently.
+
+### Address blocks by path, from the outline
+
+Paths are dot-joined child indexes: `0.3`, `0.12`. **Always read the outline from
+the last response (or `issue.get_editor`) before addressing anything.** Never
+carry paths across turns without re-reading — the tree moves when blocks are
+added or removed.
+
+```bash
+mailtea call issue.get_editor --json '{"issueId":"iss_…"}'   # → outline, styles, headers
+```
+
+### Ops
+
+| op | what it does |
+|---|---|
+| `compose` | Replaces the whole body. Establishes the editor's root wrapper, so paths start `0.0`, `0.1`, … and stay put. |
+| `insert_blocks` | Adds blocks at `path` + `position` (`before`/`after`/`append-into`); no path = append to the end. |
+| `edit_text` | Rewrites one block's copy: `{edits:[{path,text}]}`. |
+| `edit_block` | Sets one block's attributes: `{path, expectType, attrs}`. |
+| `set_styles` | The email's look, as flat tokens (below). |
+| `arrange` | `moves` then `deletes`; every address resolves against the doc as it was at the start of the batch. |
+| `set_headers` | `subject` and `previewText` (the inbox preheader). |
+
+### Block kinds
+
+`heading` (text, level 1-3) · `text` · `bulletList` / `numberedList` (items) ·
+`quote` · `button` (label, href, alignment, variant) · `image` (src, alt,
+alignment) · `divider` · `spacer` (height) · `columns` · `section` · `footer` ·
+`html` · `variable` (key, fallback).
+
+Text fields take inline markup — `**bold**`, `*italic*`, `[label](https://url)` —
+and nothing else. **A `\n` inside one text block becomes a line break**; for two
+visually separate lines with normal spacing, use two blocks.
+
+### Brand colour — `set_styles` tokens
+
+```json
+{"op":"set_styles","tokens":{
+  "accentColor":"#FF6719", "linkColor":"#B23C00", "headingColor":"#1a1a1a",
+  "bodyText":"#1a1a1a", "pageBackground":"#ffffff", "bodyBackground":"#ffffff",
+  "fontFamily":"Georgia, 'Times New Roman', Times, serif",
+  "bodyWidth":"600", "bodyPadding":"24", "pagePadding":"16",
+  "bodyCornerRadius":"0", "bodyBorder":"0", "bodyBorderColor":"#e5e7eb"
+}}
+```
+
+`accentColor` drives the button fill, the quote rule and section badges;
+`linkColor` drives body links. **They are not the same value.** An accent chosen
+to look right as a button fill is usually too light as link text — check the link
+colour reaches 4.5:1 against the body background and darken it if not.
+
+A button that was given its own colour keeps it and ignores the accent. To
+recolour that one button: `edit_block` with `attrs:{buttonColor, textColor}`.
+
+### Images
+
+An image block needs an **absolute URL**, so the picture has to exist somewhere
+first. Upload it — do not hot-link somebody else's host, and do not invent a URL.
+
+```bash
+mailtea assets upload --publication-id pub_123 --file ./hero.png \
+  --name hero.png --width 1200 --height 452     # → JSON with the permanent `url`
+mailtea assets list --publication-id pub_123    # what is already there
+```
+
+Then place it, with real alt text:
+
+```json
+{"op":"insert_blocks","path":"0.5","position":"after","blocks":[
+  {"kind":"image","src":"https://…/asset_….png","alt":"What the picture shows.","alignment":"center"}]}
+```
+
+Four rules that decide whether the image works:
+
+- **PNG, JPEG, GIF or WebP; 5 MB max. SVG is refused** — it can carry script and
+  would be served from the publication's own domain. The bytes are checked
+  against the declared type, so a mislabelled file is rejected, not stored.
+- **Size the artwork for a phone.** A 1200px-wide image lands at roughly 350px in
+  a phone's mail app. Type drawn smaller than ~40px in that artwork arrives under
+  12px and stops being readable. Design for the phone, then check it.
+- **Never put meaning only in an image.** Many clients block images by default —
+  the email must still read with them off, which is what `alt` is for.
+- **Retiring an asset does not remove it from the email.** `assets delete` hides
+  it from the library and the file keeps resolving (so already-sent mail stays
+  intact); repoint or delete the block yourself.
+
+### Gotchas that cost real time
+
+- **`compose` replaces the body.** To add to an existing email use
+  `insert_blocks`.
+- **An HTML-backed draft cannot be addressed by ops.** `issue.get_editor` reports
+  `docBacked: false` for those; `compose` first, then ops work.
+- **The subject IS the issue title.** `set_headers` moves it. If an operator has
+  the email open in the editor, refresh their tab after changing it.
+- **Lint before you send, every time.** `email.lint` is a few seconds and it
+  names the client that breaks.
+
+## B. Hand-written HTML
+
+### 0. Pick the surface
 
 Mailtea has two content models. Using the wrong one is the #1 cause of "it looked
 different when sent / when I opened it in the editor."
@@ -36,7 +158,7 @@ Rules of thumb:
   block-based design** (high-fidelity — tables/text/images/buttons become real blocks, the
   page background/width carry over), so operators can keep editing what you produced.
 
-## 1. Frame (shape)
+### 1. Frame (shape)
 
 Before any HTML, decide:
 
@@ -47,7 +169,7 @@ Before any HTML, decide:
 - **Variables** — what's personalized (`{{first_name}}`, `{{review_url}}`,
   `{{unsubscribe_url}}`). Plan these as `{{snake_case}}` tokens now.
 
-## 2. Build — the email-safe contract (non-negotiable)
+### 2. The email-safe contract (non-negotiable)
 
 These aren't style preferences; break them and the layout collapses in a major client.
 
@@ -58,7 +180,7 @@ These aren't style preferences; break them and the layout collapses in a major c
 - **Fixed width ~600px**, centered, with a `@media (max-width:620px){ width:100%
   !important }` fallback for mobile.
 - **Never emit these** — Mailtea lints serialized HTML against the real
-  caniemail matrix (`apps/web/app/lib/caniemail/caniemail-lint.ts`,
+  caniemail matrix (`packages/editor-render/src/caniemail-lint.ts`,
   `lintEmailHtml()`), strict clients = **Apple Mail, Gmail, Outlook desktop**:
 
   | Severity | Don't use | Use instead |
@@ -99,7 +221,7 @@ These aren't style preferences; break them and the layout collapses in a major c
 - **Accessibility**: real text (not text-in-images), `lang` on `<html>`,
   `role="presentation"` on layout tables, ≥14px body, AA contrast.
 
-## 3. Design judgment (typeset · layout · colorize · distill · polish)
+## Design judgment (both paths)
 
 Constraints handled — now make it *good*. Mailtea's brand is **precise, calm,
 recipient-faithful** (see `CLAUDE.md` → Design Context):
@@ -125,7 +247,7 @@ recipient-faithful** (see `CLAUDE.md` → Design Context):
   `text-underline-offset` instead of a heavy button when the tone is personal,
   a real signature, a complete footer (address + unsubscribe).
 
-## 4. Render and compare (critique)
+## Render and compare — never ship unrendered
 
 Never ship unrendered. The loop:
 
@@ -242,6 +364,10 @@ All survive the email-safe lint AND the no-code editor's HTML→blocks import.
 
 ## Don't
 
+- Don't reach for hand-written HTML when blocks would do — the ops path is
+  email-safe by construction and stays editable for the operator.
+- Don't reuse a block path from an earlier turn. Re-read the outline.
+- Don't put an image in without `alt`, or size its type for a desktop preview.
 - Don't paste a web/marketing-page layout into an email — flex/grid/`var()` will
   collapse in Outlook and Gmail.
 - Don't type social icons as font glyphs or characters — use hosted `<img>` icons.

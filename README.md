@@ -2,22 +2,23 @@
 
 Agent skills that teach AI coding agents (Claude Code, Cursor, or any
 SKILL.md-compatible harness) how to work with
-[Mailtea](https://mailtea.app) — send, schedule, and manage email, and design
-emails that survive real inboxes.
+[Mailtea](https://mailtea.app) — send, schedule and manage email, design emails
+and templates that survive real inboxes, and build the publication's website.
 
 ## Skills
 
 | Skill | What it does |
 |-------|--------------|
 | [`mailtea`](./mailtea/SKILL.md) | Send, schedule, and manage email — transactional sends, batches, delivery status, contacts, segments, newsletters — via the Mailtea MCP server, the `mailtea-sdk` Node SDK, or the REST API. |
-| [`mailtea-email-design`](./mailtea-email-design/SKILL.md) | Design the email itself: layout, typography, and email-safe HTML that renders correctly across real email clients. |
+| [`mailtea-email-design`](./mailtea-email-design/SKILL.md) | Design the email itself — the structured block/ops path (email-safe by construction, and the fast one), images, brand colour, and hand-written email-safe HTML when you own the whole document. |
+| [`mailtea-site-design`](./mailtea-site-design/SKILL.md) | Build and restyle the publication's public website: pages, section presets, theme, the design brief, and the draft → publish flow. |
 
 ## Install
 
 Copy the skill directories into your agent's skills folder, e.g. for Claude Code:
 
 ```bash
-cp -r mailtea mailtea-email-design ~/.claude/skills/
+cp -r mailtea mailtea-email-design mailtea-site-design ~/.claude/skills/
 ```
 
 Or add them per-project under `.claude/skills/`.
