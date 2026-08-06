@@ -75,6 +75,8 @@ visually separate lines with normal spacing, use two blocks.
 ```json
 {"op":"set_styles","tokens":{
   "accentColor":"#FF6719", "linkColor":"#B23C00", "headingColor":"#1a1a1a",
+  "textOnAccentColor":"#ffffff", "linkDecoration":"underline",
+  "bodyFontSizePx":"18", "titleFontSizePx":"34",
   "bodyText":"#1a1a1a", "pageBackground":"#ffffff", "bodyBackground":"#ffffff",
   "fontFamily":"Georgia, 'Times New Roman', Times, serif",
   "bodyWidth":"600", "bodyPadding":"24", "pagePadding":"16",
@@ -89,6 +91,15 @@ colour reaches 4.5:1 against the body background and darken it if not.
 
 A button that was given its own colour keeps it and ignores the accent. To
 recolour that one button: `edit_block` with `attrs:{buttonColor, textColor}`.
+
+`titleFontSizePx` sets the whole heading scale — h2 and h3 derive from it, so
+there is no separate token per level. Sizes are range-checked, not clamped: ask
+for 9px body copy and the op is refused with the range, because a size nobody
+chose is worse than an error.
+
+**Underline your links unless something else distinguishes them.** The default
+is `none` (it matches the template corpus), but colour alone fails WCAG 1.4.1 —
+`"linkDecoration":"underline"` is the fix.
 
 ### Images
 
