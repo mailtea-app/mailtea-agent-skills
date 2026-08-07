@@ -15,7 +15,9 @@ and templates that survive real inboxes, and build the publication's website.
 
 ## Install
 
-Copy the skill directories into your agent's skills folder, e.g. for Claude Code:
+**Preferred (portable):** use the [Mailtea Agent Plugin](../agent-plugin/) — skills plus the Mailtea MCP server in one [Agent Plugins](https://agent-plugins.org/) package that Cursor, Codex, Copilot, VS Code, and Kiro can load.
+
+**Skills only:** copy the skill directories into your agent's skills folder, e.g. for Claude Code:
 
 ```bash
 cp -r mailtea mailtea-email-design mailtea-site-design ~/.claude/skills/
