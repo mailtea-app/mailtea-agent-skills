@@ -191,8 +191,8 @@ These aren't style preferences; break them and the layout collapses in a major c
 - **Fixed width ~600px**, centered, with a `@media (max-width:620px){ width:100%
   !important }` fallback for mobile.
 - **Never emit these** — Mailtea lints serialized HTML against the real
-  caniemail matrix (`packages/editor-render/src/caniemail-lint.ts`,
-  `lintEmailHtml()`), strict clients = **Apple Mail, Gmail, Outlook desktop**:
+  caniemail matrix (`email.lint`), strict clients = **Apple Mail, Gmail,
+  Outlook desktop**:
 
   | Severity | Don't use | Use instead |
   |----------|-----------|-------------|
@@ -234,8 +234,8 @@ These aren't style preferences; break them and the layout collapses in a major c
 
 ## Design judgment (both paths)
 
-Constraints handled — now make it *good*. Mailtea's brand is **precise, calm,
-recipient-faithful** (see `CLAUDE.md` → Design Context):
+Constraints handled — now make it *good*. Follow the publication's own brand; if
+it hasn't got one written down, default to **precise, calm, recipient-faithful**:
 
 - **typeset** — One serif for body (`Source Serif 4`), one sans for UI/labels
   (`Space Grotesk`); `Instrument Serif` for display moments. Body 16–19px,
@@ -262,14 +262,13 @@ recipient-faithful** (see `CLAUDE.md` → Design Context):
 
 Never ship unrendered. The loop:
 
-1. **Lint** — run the HTML past `lintEmailHtml()`; resolve every `fail`.
+1. **Lint** — run the HTML past `email.lint`; resolve every `fail`.
 2. **Render with variables** — Mailtea substitutes `{{var}}` and `{{{var}}}`
-   placeholders (`apps/api/src/template-render.ts`). On the **posts** path only
-   *passed* variables are replaced, so pass them all; the **transactional** send
-   path also applies a variable's declared `fallback_value`.
-3. **See it in a real client** — send to Mailpit
-   (`pnpm --filter @mailtea/web exec tsx app/../scripts/send-templates-to-mailpit.ts`,
-   web UI at `http://localhost:8026`), or open the rendered HTML in a browser.
+   placeholders. On the **posts** path only *passed* variables are replaced, so
+   pass them all; the **transactional** send path also applies a variable's
+   declared `fallback_value`.
+3. **See it in a real client** — `issue.preview`, a send-test to your own
+   address, or open the rendered HTML in a browser.
 4. **Compare to intent** — if you were given a reference, screenshot the render and
    check fidelity (wordmark, fonts, spacing, color, footer). Fix the gaps, re-render.
 
