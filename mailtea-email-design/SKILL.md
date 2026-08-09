@@ -235,7 +235,94 @@ These aren't style preferences; break them and the layout collapses in a major c
 ## Design judgment (both paths)
 
 Constraints handled — now make it *good*. Follow the publication's own brand; if
-it hasn't got one written down, default to **precise, calm, recipient-faithful**:
+it hasn't got one written down, default to **precise, calm, recipient-faithful**.
+
+Below is the rubric Mailtea's own email assistant is given and its eval harness
+scores against, so it is the bar your email is measured at too.
+
+<!-- BEGIN generated:design-rubric -->
+<!-- Generated from @mailtea/contracts by scripts/sync-rubric-docs.mjs.
+     Edit packages/contracts/src/design-rubric.ts, then run `pnpm rubric:sync`. -->
+
+Every email you produce is scored on six dimensions, 0-4 each, 24 total. Aim for 4s.
+
+### Hierarchy
+
+One dominant idea leads and everything else supports it. Composition carries the reading order before a word is read: with detail blurred, the primary element, the secondary element and the major groups should still be identifiable in that order. Rhythm comes from deliberate contrast between tight and generous intervals, not one spacing value repeated until every block weighs the same. Group by proximity before reaching for a box, and give a heading more room above it than below.
+
+4 — One unmistakable lead, groups that read in order, and an authored tight/generous rhythm.
+2 — A lead exists but competes with a second element, or spacing is uniform throughout.
+0 — No lead element — blocks of equal weight in an undifferentiated stack.
+
+### Typography
+
+Scale, weight and measure are chosen rather than inherited. Heading, body and fine print are distinguishable at a glance, and no two sizes sit close enough to be doing the same job. Body copy stays comfortable — 16px and up, with a line length in the 45-75 character range — and the family belongs to the product instead of being the closest available default.
+
+4 — A deliberate role scale with obvious steps; body copy comfortable at every width.
+2 — A workable scale with one collision, or a measure that runs long.
+0 — Arbitrary or colliding sizes; body copy too small or too wide to read comfortably.
+
+### Color
+
+A restrained palette with roles, not a bag of swatches: a background, a surface, text, and one accent that owns the one action. Where the publication's design brief is present it governs — follow it strictly, and fall back to Mailtea house style only when no brief exists. The strongest color earns a deliberate region or role; spending it on decoration leaves nothing to mark the thing that matters.
+
+4 — Every color has a role, the accent is rare and lands on the action, and the brief is honoured.
+2 — Mostly coherent, but a second accent or a decorative color dilutes the action.
+0 — Palette sprawl or an accent scattered everywhere; a brief, if present, is contradicted.
+
+### Accessibility
+
+WCAG AA, measured rather than claimed. Body text clears 4.5:1 against what sits behind it and large text 3:1. Every image carries alt text that reads on its own. Headings descend without skipping a level, links are told apart by more than color, and nothing that matters exists only inside a picture.
+
+4 — Every measured pair passes, alt text is meaningful, structure is semantic.
+2 — Mostly compliant with one measurable failure — a low-contrast secondary, a missing alt.
+0 — Contrast failures on body copy, images without alt text, meaning carried only by an image.
+
+### Clarity
+
+Copy is concrete, active-voice and sentence case, in the publication's own language. Controls name the action they perform — a label reading "Learn more" out of context names nothing. There is one obvious next action, reachable without hunting. No hype adjectives, no exclamation marks, no invented statistics or testimonials.
+
+4 — Every line concrete, one named primary action, nothing overstated.
+2 — Readable copy, but a vague control label or a second action competing with the first.
+0 — Hype copy, generic labels, and no discernible next action.
+
+### Inbox fitness
+
+The email survives a real client. It is a body FRAGMENT — never a full document, its own page background, or an unsubscribe footer, all three of which Mailtea's shell supplies. One column at around 600px, stacking cleanly on a phone. It still reads with images off, because many clients block them by default. Subject and preview text do different jobs and neither is empty. Shell chrome and the unsubscribe footer are outside this score.
+
+4 — Fragment, single column at inbox width, meaningful with images off, headers doing two jobs.
+2 — Deliverable but off-width, or the preview text merely restates the subject.
+0 — A full document, content that collapses with images off, or empty headers.
+
+### Named failure modes
+
+Each of these is a defect the score looks for by name. Do not produce one.
+
+- any.hierarchy.section-sprawl (P2) — Sections that do not earn their place — six things said vaguely instead of one thing said well.
+- any.hierarchy.weak-opening (P2) — No dominant opening: nothing establishes what this is before the reader has to work it out.
+- any.hierarchy.unauthored-rhythm (P2) — One spacing value repeated end to end — no tight/generous contrast, so every block weighs the same and nothing groups.
+- any.hierarchy.no-lead-among-peers (P2) — Several topics set at identical weight, leaving the reader to choose the lead the composition should have named.
+- any.typography.body-copy-too-small (P2) — Body copy set below 16px, which reads cramped on a phone.
+- any.typography.scale-collision (P2) — Heading and body sizes sit too close to carry different jobs — one size doing two jobs.
+- any.color.palette-sprawl (P2) — More colors than roles — beyond a background, a surface, text and one accent.
+- any.color.brief-violation (P1) — Contradicts the publication's design brief, which governs whenever one is present.
+- any.a11y.low-contrast (P1) — A text/background pair below WCAG AA — 4.5:1 for body copy, 3:1 for large text.
+- any.a11y.missing-alt (P1) — An image with no alt text, or alt text that does not read on its own.
+- any.a11y.meaning-in-image (P1) — Copy that exists only inside a picture — it disappears when images are blocked or unreadable.
+- any.clarity.hype-copy (P2) — Hype adjectives, exclamation marks, or invented statistics and testimonials.
+- any.clarity.generic-cta (P2) — A control labelled "Click here" or "Learn more" — a label that names nothing out of context.
+- any.clarity.no-primary-action (P1) — No obvious next action, or several competing for the same attention.
+- email.inbox.full-document (P0) — Emitted a full HTML document, its own page background, or an unsubscribe footer — Mailtea's shell supplies all three, so this double-wraps.
+- email.inbox.missing-headers (P1) — Subject line or preview text left empty after composing.
+- email.inbox.subject-preview-echo (P2) — Preview text restates the subject instead of saying what the subject left out.
+- email.inbox.body-width-off (P2) — Body width outside 480-680px, the range inboxes render predictably.
+- email.inbox.image-off-collapse (P1) — The email stops making sense with images blocked, which is how many clients open it.
+- email.color.accent-two-jobs (P2) — Headings drawn in the accent, so they compete with the button for the same attention.
+- email.a11y.link-color-only (P2) — Body links told apart by color alone and below 3:1 against the surrounding text — WCAG 1.4.1.
+
+<!-- END generated:design-rubric -->
+
+### Mailtea house specifics
 
 - **typeset** — One serif for body (`Source Serif 4`), one sans for UI/labels
   (`Space Grotesk`); `Instrument Serif` for display moments. Body 16–19px,
@@ -248,11 +335,9 @@ it hasn't got one written down, default to **precise, calm, recipient-faithful**
   that stacks them (`display:block;width:100%`) on mobile. Don't flatten a genuine
   side-by-side layout into a single stacked column. Let the white canvas breathe; hairline
   dividers over boxes.
-- **colorize** — Restraint. Near-neutral text on a warm/white canvas, a *single*
-  committed accent for the one CTA. Status meaning stays (scheduled blue, sent
-  green, failed red). No garish gradients (and they're `warn`-listed anyway).
-- **distill** — Cut to one message and one action. If a section doesn't serve the
-  primary job, remove it.
+- **colorize** — Near-neutral text on a warm/white canvas. Status meaning stays
+  (scheduled blue, sent green, failed red). No garish gradients (and they're
+  `warn`-listed anyway).
 - **polish** — The last 10%: optical alignment, consistent corner radii
   (`rounded-md`/`-lg`, not pill-everything), an underlined text link with
   `text-underline-offset` instead of a heavy button when the tone is personal,
