@@ -17,9 +17,9 @@ look, fix, and only publish when the user asks.
 
 ```
 site.get                 → what exists: pages, theme, live vs draft
-site.presets_list        → the section presets you can insert (use these, don't invent)
+site.section_templates_list        → the section templates you can insert (use these, don't invent)
 site.design_brief_set    → the durable intent, once (below)
-site.apply_ops           → compose / insert / edit / arrange / theme
+site.apply_ops           → compose / insert / edit / arrange / theme / navbar / rename
 site.publish             → make it real  ← only when the user asks
 ```
 
@@ -35,19 +35,21 @@ what applied and what was skipped, same contract as the email reducer.
 | op | what it does |
 |---|---|
 | `compose_page` | Replaces a page's whole section list. |
-| `insert_section` | Adds a preset section at `index`, with `copy` for its text slots. |
-| `swap_section` | Replaces one section with a different preset, carrying the copy across. |
+| `insert_section` | Adds a template section at `index`, with `copy` for its text slots. |
+| `swap_section` | Replaces one section with a different template, carrying the copy across. |
 | `edit_copy` | Rewrites text: `{edits:[{nodeId, …}]}`. |
 | `edit_style` | One node's `style` / `layout`. |
 | `arrange` | `moves` then `deletes`. |
+| `set_navbar_template` | `templateId` from `site.navbar_templates_list`, optional `brand`. Replaces the navbar. |
+| `rename_nodes` | `renames: [{nodeId, layerName}]`. Layer-tree labels only — nothing a visitor sees. |
 | `set_theme` | Site-wide design tokens. |
 
 Sections are addressed by **`nodeId`**, not by index path — ids are stable across
 edits, so unlike the email reducer you can safely hold one across turns. Get them
 from `site.page_get`.
 
-Prefer `insert_section` with a **preset** over composing raw structure: presets
-are the vocabulary the theme knows how to style, so a preset section inherits the
+Prefer `insert_section` with a **template** over composing raw structure: templates
+are the vocabulary the theme knows how to style, so a template section inherits the
 site's design and a hand-built one drifts from it.
 
 ## Pages
@@ -86,6 +88,6 @@ would make the site needlessly primitive.
 - Don't publish unless the user asked. Draft is the default for a reason.
 - Don't call `site.discard_draft` to "clean up" — it destroys the operator's
   pending work too.
-- Don't invent section structure when a preset exists.
+- Don't invent section structure when a template exists.
 - Don't hot-link images from another host; upload them.
 - Don't leave a new page without `seoTitle` / `seoDescription`.
