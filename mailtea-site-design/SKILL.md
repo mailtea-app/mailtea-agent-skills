@@ -29,8 +29,12 @@ undoable — confirm before calling it.
 
 ## Ops
 
-`site.apply_ops` takes `{publicationId, pageId, ops, baseVersion}` and reports
+`site.apply_ops` takes `{pageId, ops, baseVersion}` and reports
 what applied and what was skipped, same contract as the email reducer.
+
+Every site tool also accepts `publicationId`, but it is optional: it defaults to
+the publication the connection is for. Pass it only when the connection reaches
+more than one.
 
 | op | what it does |
 |---|---|
@@ -54,7 +58,7 @@ site's design and a hand-built one drifts from it.
 
 ## Pages
 
-`site.page_upsert` needs `{publicationId, kind, slug, title}` and optionally
+`site.page_upsert` needs `{kind, slug, title}` and optionally
 `status`, `contentJson`, and the SEO fields (`seoTitle`, `seoDescription`,
 `seoOgImageUrl`). Write the SEO fields — a page shared without them gets an ugly
 unfurl, and nobody goes back to add them later.

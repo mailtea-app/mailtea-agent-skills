@@ -16,8 +16,11 @@ Mailtea lets you send and manage email programmatically. Prefer the **MCP server
 ## Setup (once)
 
 If Mailtea MCP is already connected, use it directly. Call `auth.me` and
-`publication.list` to check the account and available publications. Ask which
-publication to use when the request is ambiguous; never guess across accounts.
+`publication.list` to check the account and available publications. A browser
+sign-in connects you to ONE publication — the one the user picked on the consent
+screen — so `publicationId` is optional on every tool and defaults to it. Pass
+one only when the connection reaches several publications; ask which to use when
+that is the case and the request is ambiguous, and never guess across accounts.
 
 If it is not connected, tell the user to connect Mailtea in their agent client
 (browser sign-in; never paste credentials in chat). They sign in to Mailtea and
@@ -55,12 +58,14 @@ audience, and website; do not assume the user knows that term.
 1. If the connection is missing, direct the user to connect Mailtea in their
    agent client. Use the browser sign-in flow; never ask for passwords or
    tokens in chat.
-2. Read `auth.me` and `publication.list`. Use the publication the user named;
-   otherwise ask them to choose if more than one is available. If none is
-   accessible, explain whether they need to create a publication in Mailtea
-   Studio or reconnect with access to an existing one.
-3. Read `sender.list` and `domain.list` for the selected publication, using the
-   live tool schemas. Show available sender addresses without exposing credentials.
+2. Read `auth.me` and `publication.list`. If exactly one publication comes back,
+   that is the connected one and every tool defaults to it — do not ask. Use the
+   publication the user named; otherwise ask them to choose when more than one is
+   available. If none is accessible, explain whether they need to create a
+   publication in Mailtea Studio or reconnect with access to an existing one.
+3. Read `sender.list` and `domain.list`, using the live tool schemas. Omit
+   `publicationId` to use the connected publication; pass it only when the user
+   picked one of several. Show available sender addresses without exposing credentials.
    If the domain or DKIM is unverified, explain the missing verification and link
    to https://docs.mailtea.app/docs/documentation/domains. Do not change DNS or
    create senders just because the user asked to check setup.
