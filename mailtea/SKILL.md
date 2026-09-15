@@ -40,7 +40,7 @@ server is `https://api.mailtea.app/mcp`.
 | Grok Build | `/marketplace` and choose Mailtea, or reconnect from `grok mcp` |
 | ChatGPT | Settings, Apps & Connectors, Mailtea, Reconnect |
 
-For a local stdio connection, get a personal access token (prefix `mt_pat_`) from Mailtea Studio
+For a local stdio connection, get a personal access token (prefix `mt_pat_`, or `mt_test_` for a test key) from Mailtea Studio
 (**Settings → API keys**) or `POST /v1/api-keys`. Then connect Claude Code:
 
 ```bash
@@ -107,11 +107,31 @@ be determined, explain the uncertainty instead of sending a possible duplicate.
 
 ## Manage email
 
-- `email.list` — list emails (filter by `status`, `tag_name`/`tag_value`, date
-  range; paginate with `limit`/`offset`).
+- `email.list` — list emails (filter by `status`, `mode`, `tag_name`/`tag_value`,
+  date range; paginate with `limit`/`offset`).
 - `email.get` — delivery status (`last_event`) + `open_count` / `click_count`.
 - `email.batch` — up to 100 emails in one call (no attachments/scheduling).
 - `email.reschedule` / `email.cancel` — for still-`scheduled` emails.
+
+## Test mode
+
+A test key (`mt_test_…`) sends nothing. Every message is validated, recorded and
+emits webhooks, but is never handed to a provider — so you can exercise the whole
+send path without a message reaching an inbox. Mint one with `api_key.create`
+(`{"name": "CI", "mode": "test"}`) and connect with it instead of the live token.
+
+Reserved recipients on `test.mailtea.email` force the outcome, decided by the
+first `to` recipient: `delivered@`, `bounced@`, `complained@`, `delayed@`,
+`failed@`. Anything else is delivered.
+
+`email.list` takes `mode` to read test mail back, and a test row is marked
+`[test]` in the summary. A test key reads only test mail and a live key only
+live mail; there is no mixed view.
+
+A test key is **not** a data sandbox: it reads and writes the real contacts,
+templates, senders and webhooks. Only delivery is simulated. Newsletter sends,
+"send me a copy" and automation enrollment are refused with a test key — say so
+rather than retrying.
 
 ## Send a newsletter (to the whole publication list)
 
