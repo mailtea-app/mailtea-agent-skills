@@ -79,9 +79,10 @@ mailtea assets upload --publication-id pub_123 --file ./cover.jpg --width 1600 -
 mailtea assets list --publication-id pub_123
 ```
 
-PNG / JPEG / GIF / WebP, 5 MB max. SVG is refused — it can carry script and is
-served from the publication's own domain. The bytes are checked against the
-declared content type, so a mislabelled file is rejected rather than stored.
+PNG / JPEG / GIF / WebP / SVG, 5 MB max. SVG is fine on a site page: it is
+served under a sandboxing Content-Security-Policy, so it cannot run script. The
+bytes are checked against the declared content type, so a mislabelled file is
+rejected rather than stored.
 
 Unlike email, a website is a normal web page: real fonts, flexbox and CSS
 variables are all fine here. Do **not** carry the email-safe contract over — it

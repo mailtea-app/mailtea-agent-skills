@@ -86,6 +86,10 @@ A one-shot email to specific recipients (NOT a newsletter to the whole list).
 
 - Required: exactly one of `from` (must use a verified domain) or `sender_id`,
   plus `to` (string or array, ≤50) and `subject`.
+- With a `template`, `subject`, `from` and `sender_id` may be omitted: the
+  template's published subject is used, and its sender is the publication's default
+  sender, then the template's own From. The template's variables fill the
+  subject the same way they fill the body.
 - Body: provide `html` and/or `text`, **or** a `template` reference — not both.
 - Optional: `cc`, `bcc`, `reply_to`, `scheduled_at` (ISO 8601 → schedule),
   `tags` (`[{name,value}]`), `headers`, `attachments` (`{filename, content(base64)}`).
@@ -153,18 +157,28 @@ result against the real caniemail matrix before you send. See
 variables. `template.list` / `get` / `update` / `duplicate` / `delete`, and
 `template.versions` / `template.restore_version` for history.
 
-**Editing a published template unpublishes it.** Any content change — including
-the subject line — returns it to draft, and automations and the API STOP sending
-it until you `template.publish` again. The response tells you: `unpublished:
-true`. Re-publish, or tell the user you left it as a draft on purpose.
+**Editing a published template does not change what it sends until you
+publish.** Any content change, including the subject line, From and Reply-To,
+is saved as unpublished changes. The template stays published, and automations
+and the API keep sending its published version until you `template.publish`
+again. Restoring an older version works the same way. The response tells you:
+`has_unpublished_versions: true`. Publish to make the change live, or tell the
+user you left it unpublished on purpose. `template.unpublish` is the only way to
+stop a published template sending, short of deleting it.
+
+In `template.versions`, `is_current` marks the entry that matches the saved
+design you are editing, and `is_published` marks the one that is sending.
+Creating a post from a template (`issue.create_draft` with `templateId`) uses
+the published version and HTML-escapes the `variables` you pass; the template
+needs `{{{key}}}` where a value is meant to be raw HTML.
 
 ## Images
 
 `site.asset_upload` puts an image in the publication's library and returns the
 permanent URL an image block needs; `site.asset_list` shows what is already
 there; `site.asset_delete` retires one (the file keeps resolving, so already-sent
-email does not break). CLI: `mailtea assets upload|list|delete`. PNG/JPEG/GIF/WebP,
-5 MB max — SVG is refused because it can carry script.
+email does not break). CLI: `mailtea assets upload|list|delete`. PNG/JPEG/GIF/WebP/SVG,
+5 MB max. SVG is for site pages only: Gmail and Outlook do not show SVG in email.
 
 ## Website
 
@@ -207,7 +221,13 @@ all with `Authorization: Bearer mt_pat_...`.
 - `from` must use a domain verified in the workspace, or the send is rejected.
 - Use either inline content (`html`/`text`) **or** a `template`, never both.
 - `email.send` is one-shot transactional; `issue.send_now` mails the entire list.
-- A newsletter's **subject is its title** — `issue.apply_ops` with `set_headers`
-  moves both. If an operator has that email open in the Visual Email Designer,
-  have them reload before typing, or their session's copy of the subject wins.
+- A newsletter's **subject is its `title`**: `issue.apply_ops` with `set_headers`
+  changes it. Its `name` is only the post's internal name in Mailtea Studio and
+  never becomes the subject; rename with `issue.update_draft` `name`. If an
+  operator has that email open in the Visual Email Designer and edits the
+  subject, their edit wins, so have them reload first.
+- A post can carry its own `from` and `replyTo` (`issue.create_draft` /
+  `issue.update_draft`). `from` must be on a verified sending domain or the call
+  is refused; a From on the built-in `*.mailtea.email` address is kept for test
+  emails, but the post itself sends from the publication's default sender.
 - Site edits go to a draft. Nothing reaches visitors until `site.publish`.

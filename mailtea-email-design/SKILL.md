@@ -56,7 +56,7 @@ mailtea call issue.get_editor --json '{"issueId":"iss_…"}'   # → outline, st
 | `edit_text` | Rewrites one block's copy: `{edits:[{path,text}]}`. |
 | `edit_block` | Sets one block's attributes: `{path, expectType, attrs}`. |
 | `set_styles` | The email's look, as flat tokens (below). |
-| `arrange` | `moves` then `deletes`; every address resolves against the doc as it was at the start of the batch. |
+| `arrange` | `moves` then `deletes`. Addresses resolve against the doc as it stands when this op runs, so an earlier `insert_blocks` or `arrange` in the same batch has already shifted them. Give every delete an `expectType` (`{path, expectType}`): if any address in the op is stale, the whole op is refused and nothing is deleted. |
 | `set_headers` | `subject` and `previewText` (the inbox preheader). |
 
 ### Block kinds
@@ -121,9 +121,10 @@ Then place it, with real alt text:
 
 Four rules that decide whether the image works:
 
-- **PNG, JPEG, GIF or WebP; 5 MB max. SVG is refused** — it can carry script and
-  would be served from the publication's own domain. The bytes are checked
-  against the declared type, so a mislabelled file is rejected, not stored.
+- **PNG or JPEG for email; 5 MB max.** GIF and WebP upload too. SVG uploads, but
+  Gmail and Outlook do not show SVG images in email, so never put one in an
+  email or template. The bytes are checked against the declared type, so a
+  mislabelled file is rejected, not stored.
 - **Size the artwork for a phone.** A 1200px-wide image lands at roughly 350px in
   a phone's mail app. Type drawn smaller than ~40px in that artwork arrives under
   12px and stops being readable. Design for the phone, then check it.
