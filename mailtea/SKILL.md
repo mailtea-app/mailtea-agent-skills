@@ -230,4 +230,14 @@ all with `Authorization: Bearer mt_pat_...`.
   `issue.update_draft`). `from` must be on a verified sending domain or the call
   is refused; a From on the built-in `*.mailtea.email` address is kept for test
   emails, but the post itself sends from the publication's default sender.
+- **Read, then write with the token you read.** A person may have the same
+  template, automation or post open in Mailtea Studio. Pass `base_revision` to
+  `template.update`, `base_version` (with `steps`) to `automation.update`, and
+  `baseUpdatedAt` to `issue.update_draft`, taken from your last read or write.
+  A 409 (`stale_write`, `stale_version`, or "changed elsewhere") means someone
+  changed it since and nothing was saved: re-read, re-apply your change to what
+  you got back, and retry with the new token. Never resend the same request.
+- A post you write with `contentHtml` stays HTML. The Visual Email Designer
+  shows it read-only until the operator chooses Edit as blocks or Edit HTML, so
+  opening it changes nothing.
 - Site edits go to a draft. Nothing reaches visitors until `site.publish`.
