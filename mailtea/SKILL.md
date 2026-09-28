@@ -167,7 +167,11 @@ user you left it unpublished on purpose. `template.unpublish` is the only way to
 stop a published template sending, short of deleting it.
 
 In `template.versions`, `is_current` marks the entry that matches the saved
-design you are editing, and `is_published` marks the one that is sending.
+design you are editing, and `is_published` marks the one that is sending. Each
+entry also carries its `from` and `reply_to`: a change to only the sender
+records a version (or folds into the open one, like any edit), and
+`template.restore_version` brings the sender back with the design. An entry with `sender_recorded: false` predates sender history, and
+restoring it keeps the current sender.
 Creating a post from a template (`issue.create_draft` with `templateId`) uses
 the published version and HTML-escapes the `variables` you pass; the template
 needs `{{{key}}}` where a value is meant to be raw HTML.
