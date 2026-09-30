@@ -137,11 +137,26 @@ templates, senders and webhooks. Only delivery is simulated. Newsletter sends,
 "send me a copy" and automation enrollment are refused with a test key — say so
 rather than retrying.
 
-## Send a newsletter (to the whole publication list)
+## Send a newsletter (to the whole list or one segment)
 
 Different from transactional: `issue.create_draft` → build the body →
 `issue.schedule` or `issue.send_now`. Inspect with `issue.list_recent`,
 `issue.delivery_progress`, and `analytics.*`. Manage audience with `contact.*`.
+
+**To send to part of the list**, pass `segmentId` to `issue.create_draft` or
+`issue.update_draft` (`null` on update sends to everyone again). Omit it and the
+post goes to all active contacts. Find ids with `segment.list`; the segment must
+be in the post's publication. The segment picks the recipients when the post is
+sent, and a send to a segment that cannot be resolved or matches nobody is
+refused, never widened to the whole list. `segment.delete` refuses a segment
+that a draft, scheduled or sending post targets (`segment_in_use`, naming the
+posts): point each at another segment or clear it with `issue.update_draft`
+first (unschedule a scheduled post before editing it). `segment.create` takes
+`inactive_days` (1 to 3650): contacts with no open or click in that many days,
+counting contacts who never engaged. It finds the SILENT cohort for a sunset or
+re-engagement send, not engaged readers. Engagement tracking is not
+backfilled, so contacts with no recorded engagement count as inactive,
+including some who opened or clicked before tracking began.
 
 **To build or change the body, use `issue.apply_ops`, not `issue.update_draft`.**
 `update_draft` replaces the whole document; `apply_ops` edits it surgically —
