@@ -143,6 +143,16 @@ Different from transactional: `issue.create_draft` → build the body →
 `issue.schedule` or `issue.send_now`. Inspect with `issue.list_recent`,
 `issue.delivery_progress`, and `analytics.*`. Manage audience with `contact.*`.
 
+**Web or email only.** `issue.send_now` (and `issue.send_and_wait`) also
+publishes a newsletter to the public website unless you pass
+`publishToWeb: false`, which sends it by email only. `issue.schedule` always
+publishes a newsletter once it is delivered, so send now for an email-only
+newsletter. A broadcast never goes on the website.
+
+**One send reaches at most 25,000 contacts** by default. A larger audience is
+refused with the count and nothing is sent. Split the audience into segments
+and send one post to each; do not retry the same post.
+
 **To send to part of the list**, pass `segmentId` to `issue.create_draft` or
 `issue.update_draft` (`null` on update sends to everyone again). Omit it and the
 post goes to all active contacts. Find ids with `segment.list`; the segment must
