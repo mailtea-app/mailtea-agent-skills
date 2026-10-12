@@ -212,7 +212,8 @@ email does not break). CLI: `mailtea assets upload|list|delete`. PNG/JPEG/GIF/We
 ## Website
 
 `site.get`, `site.page_upsert`, `site.apply_ops`, `site.section_templates_list`,
-`site.design_brief_set`, `site.publish`. Edits land on a DRAFT until you publish.
+`site.design_brief_set`, `site.publish`. `site.apply_ops` edits land on a DRAFT
+until you publish; `site.page_upsert` writes a page's live document directly.
 See **mailtea-site-design**.
 
 ## In code instead of MCP
@@ -269,4 +270,6 @@ all with `Authorization: Bearer mt_pat_...`.
 - A post you write with `contentHtml` stays HTML. The Visual Email Designer
   shows it read-only until the operator chooses Edit as blocks or Edit HTML, so
   opening it changes nothing.
-- Site edits go to a draft. Nothing reaches visitors until `site.publish`.
+- Site ops go to a draft and reach visitors only on `site.publish`. The
+  exception is `site.page_upsert`, which writes the live document, so a
+  published page changes at once.

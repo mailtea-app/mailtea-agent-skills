@@ -9,9 +9,10 @@ Every Mailtea publication has one public website: a home page, an archive of
 posts, and whatever else you add. It is edited the same way an email is — a
 declarative ops batch against a draft, then a deliberate publish.
 
-**Everything you write goes to the DRAFT.** Real visitors keep seeing the live
-site until someone calls `site.publish`. That is the safety net, so use it: build,
-look, fix, and only publish when the user asks.
+**Ops go to the DRAFT.** Real visitors keep seeing the live site until someone
+calls `site.publish`. That is the safety net, so use it: build, look, fix, and
+only publish when the user asks. `site.page_upsert` is the exception: it writes
+live (see Pages).
 
 ## The loop
 
@@ -62,6 +63,12 @@ site's design and a hand-built one drifts from it.
 `status`, `contentJson`, and the SEO fields (`seoTitle`, `seoDescription`,
 `seoOgImageUrl`). Write the SEO fields — a page shared without them gets an ugly
 unfurl, and nobody goes back to add them later.
+
+`site.page_upsert` writes the page's **live** document, not the draft. A
+published page changes for visitors at once, with no preview. If the page has a
+pending draft (`hasDraft` on `site.page_get`), that draft is kept: `site.page_get`
+keeps returning it, and the next `site.publish` replaces your upsert with it.
+For edits that should wait for review, use `site.apply_ops`.
 
 ## The design brief
 
